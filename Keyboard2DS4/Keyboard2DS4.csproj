@@ -1,0 +1,46 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows7.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <UseWPF>true</UseWPF>
+    <UseWindowsForms>true</UseWindowsForms>
+    <Platforms>x64</Platforms>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="MainWindow\EffectEx\TranslationalEffect\TranslationalEffect.ps" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Nefarius.ViGEm.Client" Version="1.21.256" />
+    <PackageReference Include="SharpDX.DirectInput" Version="4.2.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="MainWindow\EffectEx\TranslationalEffect\TranslationalEffect.ps" />
+    <Resource Include="MainWindow\Resources\ds4_Base.png" />
+    <Resource Include="MainWindow\Resources\ds4_Circle.png" />
+    <Resource Include="MainWindow\Resources\ds4_Cross.png" />
+    <Resource Include="MainWindow\Resources\ds4_DpadDown.png" />
+    <Resource Include="MainWindow\Resources\ds4_DpadLeft.png" />
+    <Resource Include="MainWindow\Resources\ds4_DpadRight.png" />
+    <Resource Include="MainWindow\Resources\ds4_DpadUp.png" />
+    <Resource Include="MainWindow\Resources\ds4_L1.png" />
+    <Resource Include="MainWindow\Resources\ds4_L2.png" />
+    <Resource Include="MainWindow\Resources\ds4_L3.png" />
+    <Resource Include="MainWindow\Resources\ds4_LX.png" />
+    <Resource Include="MainWindow\Resources\ds4_Options.png" />
+    <Resource Include="MainWindow\Resources\ds4_PS.png" />
+    <Resource Include="MainWindow\Resources\ds4_R1.png" />
+    <Resource Include="MainWindow\Resources\ds4_R2.png" />
+    <Resource Include="MainWindow\Resources\ds4_R3.png" />
+    <Resource Include="MainWindow\Resources\ds4_RX.png" />
+    <Resource Include="MainWindow\Resources\ds4_Share.png" />
+    <Resource Include="MainWindow\Resources\ds4_Square.png" />
+    <Resource Include="MainWindow\Resources\ds4_Touchpad.png" />
+    <Resource Include="MainWindow\Resources\ds4_Triangle.png" />
+  </ItemGroup>
+
+</Project>
