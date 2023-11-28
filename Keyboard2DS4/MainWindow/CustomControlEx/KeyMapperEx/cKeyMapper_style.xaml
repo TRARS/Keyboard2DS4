@@ -238,6 +238,7 @@
 
         <EventSetter Event="PreviewMouseWheel" Handler="ComboBox_PreviewMouseWheel"/>
         <EventSetter Event="PreviewKeyDown" Handler="ComboBox_PreviewKeyDown"/>
+        <EventSetter Event="SelectionChanged" Handler="ComboBox_SelectionChanged"/>
     </Style>
 
     <!--ListBox-->

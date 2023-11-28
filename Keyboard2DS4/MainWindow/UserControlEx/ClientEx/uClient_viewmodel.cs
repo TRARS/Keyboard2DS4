@@ -1,7 +1,6 @@
 ﻿using Keyboard2DS4.Core;
 using Keyboard2DS4.Helper;
 using Keyboard2DS4.MainWindow.CustomControlEx.KeyMapperEx;
-using SharpDX;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -337,7 +336,7 @@ namespace Keyboard2DS4.MainWindow.UserControlEx.ClientEx
                 CreateItem(nameof(Touchpad), 262, 151, new(274,124,0,0)),
             };
 
-            this.DS4LayoutItemsOutline = new(Enumerable.Range(0, 20).Select(idx => false));
+            this.DS4LayoutItemsOutline = new(Enumerable.Range(0, OutLineIndexInfo.Values.Max() + 1).Select(idx => false));
         }
 
         private void MainLoop()
@@ -444,7 +443,7 @@ namespace Keyboard2DS4.MainWindow.UserControlEx.ClientEx
                             Mode = BindingMode.OneWay
                         });
                     }
-                    if(prop == "L3" || prop == "R3")
+                    if (prop == "L3" || prop == "R3")
                     {
                         img.SetBinding(Image.MarginProperty, new Binding(prop == "L3" ? "LX" : "RX")
                         {
@@ -491,39 +490,52 @@ namespace Keyboard2DS4.MainWindow.UserControlEx.ClientEx
         }
 
         //更新UI
-        private void UpdateUI(Dictionary<string, ResultPacket> x)
+        private void UpdateUI(Dictionary<string, ResultPacket> state)
         {
-            Share = x["Share"].ButtonValue;
-            Options = x["Options"].ButtonValue;
-            L3 = x["ThumbLeft"].ButtonValue;
-            R3 = x["ThumbRight"].ButtonValue;
+            Share = state["Share"].ButtonValue;
+            Options = state["Options"].ButtonValue;
+            L3 = state["ThumbLeft"].ButtonValue;
+            R3 = state["ThumbRight"].ButtonValue;
 
-            L1 = x["ShoulderLeft"].ButtonValue;
-            R1 = x["ShoulderRight"].ButtonValue;
-            L2 = x["TriggerLeft"].ButtonValue;
-            R2 = x["TriggerRight"].ButtonValue;
+            L1 = state["ShoulderLeft"].ButtonValue;
+            R1 = state["ShoulderRight"].ButtonValue;
+            L2 = state["TriggerLeft"].ButtonValue;
+            R2 = state["TriggerRight"].ButtonValue;
 
-            Triangle = x["Triangle"].ButtonValue;
-            Circle = x["Circle"].ButtonValue;
-            Cross = x["Cross"].ButtonValue;
-            Square = x["Square"].ButtonValue;
+            Triangle = state["Triangle"].ButtonValue;
+            Circle = state["Circle"].ButtonValue;
+            Cross = state["Cross"].ButtonValue;
+            Square = state["Square"].ButtonValue;
 
-            PS = x["PS"].ButtonValue;
-            Touchpad = x["Touchpad"].ButtonValue;
+            PS = state["PS"].ButtonValue;
+            Touchpad = state["Touchpad"].ButtonValue;
 
-            DpadUp = x["North"].ButtonValue;
-            DpadDown = x["South"].ButtonValue;
-            DpadLeft = x["West"].ButtonValue;
-            DpadRight = x["East"].ButtonValue;
+            DpadUp = state["North"].ButtonValue;
+            DpadDown = state["South"].ButtonValue;
+            DpadLeft = state["West"].ButtonValue;
+            DpadRight = state["East"].ButtonValue;
 
-            LX = x["LX"].StickValue;
-            RX = x["RX"].StickValue;
+            LX = state["LX"].StickValue;
+            RX = state["RX"].StickValue;
         }
 
-        //更新映射信息 { "Share", Key.D1 }
+        //更新映射信息
         private Dictionary<string, Key>? UpdateMappingInfo()
         {
-            return cKeyMapper_viewmodel.Instance.MappingInfoDic;
+            if (CounterAccessor.Instance["egvGXM2cy^r2epVK"] is CounterAccessor.InternalCounter counter)
+            {
+                if (counter.GetCount() == 0)
+                {
+                    return null;
+                }
+                else
+                {
+                    counter.Decrement(); Debug.WriteLine($"{DateTime.Now}");
+                    return cKeyMapper_viewmodel.Instance.MappingInfoDic;
+                }
+            }
+
+            return null;
         }
 
         //注册回调
@@ -537,7 +549,7 @@ namespace Keyboard2DS4.MainWindow.UserControlEx.ClientEx
                     if (model.BtnName == "L2Btn") { key = "L2"; }
                     if (model.BtnName == "R2Btn") { key = "R2"; }
 
-                    if (OutLineIndexInfo.TryGetValue(key, out var value)) 
+                    if (OutLineIndexInfo.TryGetValue(key, out var value))
                     {
                         DS4LayoutItemsOutline[value] = true;
                     }
@@ -546,7 +558,7 @@ namespace Keyboard2DS4.MainWindow.UserControlEx.ClientEx
                 }
                 else
                 {
-                    DS4LayoutItemsOutline = new(Enumerable.Range(0, 20).Select(idx => false));
+                    DS4LayoutItemsOutline = new(Enumerable.Range(0, OutLineIndexInfo.Values.Max() + 1).Select(idx => false));
                 }
             });
         }

@@ -28,5 +28,13 @@ namespace Keyboard2DS4.MainWindow.CustomControlEx.KeyMapperEx
         {
             e.Handled = true; // 阻止事件传播
         }
+
+        private void ComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (sender is ComboBox)
+            {
+                CounterAccessor.Instance["egvGXM2cy^r2epVK"].Increment();
+            }
+        }
     }
 }
