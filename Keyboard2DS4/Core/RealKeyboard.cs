@@ -15,16 +15,23 @@ namespace Keyboard2DS4.Core
     partial class RealKeyboard
     {
         Dictionary<Key, bool> mapping = new();
+        Dictionary<Key, bool> mapping_test = new();
 
         private RealKeyboard()
         {
             foreach (var item in Enum.GetValues(typeof(Key)).Cast<Key>().ToList())
             {
                 mapping.TryAdd(item, false);
+                mapping_test.TryAdd(item, false);
             }
 
             GetKeyboard();
         }
+    }
+
+    partial class RealKeyboard
+    {
+        public Dictionary<Key, bool> HitTest => mapping_test;
     }
 
     partial class RealKeyboard
@@ -63,7 +70,7 @@ namespace Keyboard2DS4.Core
 
             foreach (var key in mapping.Keys)
             {
-                mapping[key] = currentState.IsPressed(key);
+                mapping[key] = currentState.IsPressed(key) || mapping_test[key];
             }
 
             callback.Invoke(VirtualDS4.Instance.Update(mapping, mpInfo));

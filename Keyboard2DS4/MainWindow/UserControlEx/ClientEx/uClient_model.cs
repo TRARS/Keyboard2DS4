@@ -21,8 +21,8 @@ namespace Keyboard2DS4.MainWindow.UserControlEx.ClientEx
         public bool DpadUp { get; set; }
         public bool DpadRight { get; set; }
         public bool DpadLeft { get; set; }
-        public Vector LX { get; set; }
-        public Vector RX { get; set; }
+        public Vector LX { get; set; } = new Vector(128, 128);
+        public Vector RX { get; set; } = new Vector(128, 128);
         public bool PS { get; set; }
         public bool Touchpad { get; set; }
         public bool Base { get; set; }

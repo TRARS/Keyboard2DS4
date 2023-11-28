@@ -21,7 +21,7 @@ namespace Keyboard2DS4.MainWindow.CustomControlEx.KeyMapperEx
         public Dictionary<string, Key> MappingInfoDic => MappingInfoPacketList.ToDictionary(x => x.BtnName, x => x.BtnMapping.GetFirstKey);
     }
 
-    //对内
+    //构造
     public partial class cKeyMapper_viewmodel
     {
         cKeyMapper_model model = new();
@@ -137,8 +137,6 @@ namespace Keyboard2DS4.MainWindow.CustomControlEx.KeyMapperEx
                     Comment = $"No Comment: {x}",
                 });
             });
-
-
         }
     }
     //对内

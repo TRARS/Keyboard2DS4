@@ -5,7 +5,6 @@ using System.Reflection;
 
 namespace Keyboard2DS4.Helper
 {
-    //增加类型只能往后加不能往中间插入，不然可能会和CustomMacroPlugin.dll那边的对不上号（除非那边也引用最新的CustomMacroBase.dll）
     //
     public enum MessageType
     {

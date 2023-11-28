@@ -29,7 +29,10 @@
         </Viewbox>
 
         <Grid Grid.Column="1" Margin="5" d:MinWidth="200">
-            <keymapperex:cKeyMapper Background="#0F1029"/>
+            <keymapperex:cKeyMapper Background="#0F1029" 
+                                    BorderBrush="DarkOrange" 
+                                    BorderThickness="1" 
+                                    BorderCornerRadius="2.5" />
         </Grid>
     </Grid>
 

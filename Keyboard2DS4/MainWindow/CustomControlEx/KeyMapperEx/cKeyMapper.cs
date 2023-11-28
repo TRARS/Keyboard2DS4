@@ -3,7 +3,7 @@ using System.Windows.Controls;
 
 namespace Keyboard2DS4.MainWindow.CustomControlEx.KeyMapperEx
 {
-    public class cKeyMapper : Control
+    public partial class cKeyMapper : Control
     {
         static cKeyMapper()
         {
@@ -17,5 +17,20 @@ namespace Keyboard2DS4.MainWindow.CustomControlEx.KeyMapperEx
 
             DataContext = cKeyMapper_viewmodel.Instance;
         }
+    }
+
+    public partial class cKeyMapper
+    {
+        public CornerRadius BorderCornerRadius
+        {
+            get { return (CornerRadius)GetValue(BorderCornerRadiusProperty); }
+            set { SetValue(BorderCornerRadiusProperty, value); }
+        }
+        public static readonly DependencyProperty BorderCornerRadiusProperty = DependencyProperty.Register(
+            name: "BorderCornerRadius",
+            propertyType: typeof(CornerRadius),
+            ownerType: typeof(cKeyMapper),
+            typeMetadata: new FrameworkPropertyMetadata(new CornerRadius(0), FrameworkPropertyMetadataOptions.BindsTwoWayByDefault)
+        );
     }
 }

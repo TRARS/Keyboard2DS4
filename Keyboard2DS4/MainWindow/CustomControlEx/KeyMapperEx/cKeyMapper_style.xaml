@@ -348,13 +348,11 @@
                 <ControlTemplate TargetType="{x:Type local:cKeyMapper}">
                     <Border Background="{TemplateBinding Background}"
                             BorderBrush="{TemplateBinding BorderBrush}"
-                            BorderThickness="{TemplateBinding BorderThickness}">
-                        <Grid Background="#49000000">
+                            BorderThickness="{TemplateBinding BorderThickness}"
+                            CornerRadius="{TemplateBinding BorderCornerRadius}">
+                        <Grid Background="Transparent">
                             <!--映射列表-->
-                            <Border BorderBrush="DarkOrange" 
-                                    BorderThickness="1" 
-                                    CornerRadius="2.5" 
-                                    Padding="3,3,3,4">
+                            <Border Padding="3,3,3,4">
                                 <ListBox DataContext="{TemplateBinding DataContext}"
                                          ItemsSource="{Binding MappingInfoPacketList}"
                                          Style="{StaticResource ListBoxStyle}"/>

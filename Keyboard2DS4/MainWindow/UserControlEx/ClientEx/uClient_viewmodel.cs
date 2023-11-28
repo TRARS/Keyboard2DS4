@@ -457,28 +457,82 @@ namespace Keyboard2DS4.MainWindow.UserControlEx.ClientEx
 
                 var border = new Border();
                 {
-                    var thickness = 2;
-                    var padding = 5;
-                    border.HorizontalAlignment = HorizontalAlignment.Left;
-                    border.VerticalAlignment = VerticalAlignment.Top;
-                    border.Margin = new(mg.Left - thickness - padding, mg.Top - thickness - padding, mg.Right, mg.Bottom);
-                    border.Width = w + (thickness + padding) * 2;
-                    border.Height = h + (thickness + padding) * 2;
-                    border.CornerRadius = new(5);
-                    border.BorderBrush = new SolidColorBrush(Colors.LawnGreen);
-                    border.BorderThickness = new(thickness);
-                    border.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString($"#7F008DFF"));
-                    border.Visibility = prop == "Base" ? Visibility.Collapsed : Visibility.Visible;
-                    border.Effect = new DropShadowEffect() { Color = Colors.DarkGray, BlurRadius = 8, ShadowDepth = 0 };
+                    bool pressed = false;
+
+                    Func<string, string> getKey = (input) => 
+                    {
+                        if (input == "L2") { input = "L2Btn"; }
+                        if (input == "R2") { input = "R2Btn"; }
+                        return input;
+                    };
+                    Action pressAct = () => 
+                    {
+                        if (pressed is false)
+                        {
+                            string key = getKey.Invoke(prop);
+                            if (cKeyMapper_viewmodel.Instance.MappingInfoDic.TryGetValue(key, out var value))
+                            {
+                                RealKeyboard.Instance.HitTest[value] = true;
+                                Debug.WriteLine($"{key} press");
+                            }
+                            pressed = true;
+                        }
+                    };
+                    Action releaseAct = () => 
+                    {
+                        if (pressed)
+                        {
+                            string key = getKey.Invoke(prop);
+                            if (cKeyMapper_viewmodel.Instance.MappingInfoDic.TryGetValue(key, out var value))
+                            {
+                                RealKeyboard.Instance.HitTest[value] = false;
+                                Debug.WriteLine($"{key} release");
+                            }
+                            pressed = false;
+                        }
+                    };
+
 
                     if (prop != "Base")
                     {
-                        border.SetBinding(Border.OpacityProperty, new Binding($"{nameof(DS4LayoutItemsOutline)}.[{OutLineIndexInfo[prop]}]")
+                        var thickness = 2;
+                        var padding = 5;
+                        border.HorizontalAlignment = HorizontalAlignment.Left;
+                        border.VerticalAlignment = VerticalAlignment.Top;
+                        border.Margin = new(mg.Left - thickness - padding, mg.Top - thickness - padding, mg.Right, mg.Bottom);
+                        border.Width = w + (thickness + padding) * 2;
+                        border.Height = h + (thickness + padding) * 2;
+                        border.CornerRadius = new(5);
+                        border.BorderBrush = new SolidColorBrush(Colors.LawnGreen);
+                        border.BorderThickness = new(thickness);
+                        border.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString($"#7372C0FF"));
+                        border.Effect = new DropShadowEffect() { Color = Colors.DarkGray, BlurRadius = 8, ShadowDepth = 0 };
+
+                        border.SetBinding(Border.OpacityProperty, new Binding($"{nameof(DS4LayoutItemsOutline)}[{OutLineIndexInfo[prop]}]")
                         {
                             Source = this,
                             Converter = new uClient_converter_bool2opacity(),
                             Mode = BindingMode.OneWay
                         });
+
+                        border.MouseEnter += (s, e) =>
+                        {
+                            DS4LayoutItemsOutline[OutLineIndexInfo[prop]] = true;
+                        };
+                        border.MouseLeave += (s, e) =>
+                        {
+                            DS4LayoutItemsOutline[OutLineIndexInfo[prop]] = false;
+
+                            releaseAct.Invoke();
+                        };
+                        border.MouseLeftButtonDown += (s, e) =>
+                        {
+                            pressAct.Invoke();
+                        };
+                        border.MouseLeftButtonUp += (s, e) =>
+                        {
+                            releaseAct.Invoke();
+                        };
                     }
                 };
 
@@ -530,7 +584,7 @@ namespace Keyboard2DS4.MainWindow.UserControlEx.ClientEx
                 }
                 else
                 {
-                    counter.Decrement(); Debug.WriteLine($"{DateTime.Now}");
+                    counter.Decrement();
                     return cKeyMapper_viewmodel.Instance.MappingInfoDic;
                 }
             }
@@ -554,7 +608,7 @@ namespace Keyboard2DS4.MainWindow.UserControlEx.ClientEx
                         DS4LayoutItemsOutline[value] = true;
                     }
 
-                    Debug.WriteLine($"{model.BtnName} <- {model.BtnMapping.GetFirstKey}");
+                    //Debug.WriteLine($"{model.BtnName} <- {model.BtnMapping.GetFirstKey}");
                 }
                 else
                 {
