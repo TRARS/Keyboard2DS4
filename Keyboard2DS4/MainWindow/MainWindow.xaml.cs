@@ -4,8 +4,10 @@ using System;
 using System.ComponentModel;
 using System.Windows;
 using System.Windows.Controls;
+using WF = System.Windows.Forms;
 using System.Windows.Interop;
 using System.Windows.Media;
+using System.Windows.Media.Animation;
 
 namespace Keyboard2DS4.MainWindow
 {
@@ -18,9 +20,9 @@ namespace Keyboard2DS4.MainWindow
             var handle = new WindowInteropHelper(this).Handle;
             if (handle != IntPtr.Zero)
             {
-                var style = Win32.GetWindowLong(handle, (int)Win32.GetWindowLongIndex.GWL_STYLE);
-                style |= (int)Win32.WindowStyles.WS_CAPTION;
-                Win32.SetWindowLong(handle, (int)Win32.GetWindowLongIndex.GWL_STYLE, style);
+                var index = (int)Win32.GetWindowLongIndex.GWL_EXSTYLE;
+                var style = (int)Win32.WindowStyles.WS_EX_NOACTIVATE;
+                Win32.SetWindowLong(handle, index, style);
                 HwndSource.FromHwnd(handle).AddHook(new HwndSourceHook(this.WindowProc));
             }
         }
@@ -135,6 +137,7 @@ namespace Keyboard2DS4.MainWindow
         public MainWindow()
         {
             InitializeComponent();
+            NotifyIcon();
             this.Left = this.Top = 5;
         }
 
@@ -147,10 +150,99 @@ namespace Keyboard2DS4.MainWindow
 
             Mediator.Instance.Register(MessageType.WindowClose, _ =>
             {
-                this.WindowState = WindowState.Minimized;
+                MainWindowCloseAnimation.Invoke(this, () => { noti.Visible = false; noti.Dispose(); Environment.Exit(0); });
             });
 
             this.TryMoveToPrimaryMonitor(new(0, 0));
+        }
+    }
+
+    public partial class MainWindow
+    {
+        Action<MainWindow, Action> MainWindowCloseAnimation = (window, callback) =>
+        {
+            Storyboard sb = new();
+            double StartTime = 0;
+            double EndTime = 0.25;
+            double diff = 0.05;
+
+            var DAUKF = new DoubleAnimationUsingKeyFrames();
+            {
+                DAUKF.KeyFrames.Add(new EasingDoubleKeyFrame()
+                {
+                    KeyTime = KeyTime.FromTimeSpan(TimeSpan.FromSeconds(StartTime)),
+                    Value = 1
+                });
+                DAUKF.KeyFrames.Add(new EasingDoubleKeyFrame()
+                {
+                    KeyTime = KeyTime.FromTimeSpan(TimeSpan.FromSeconds(EndTime)),
+                    Value = 0
+                });
+            }
+            Storyboard.SetTargetName(DAUKF, window.Name);
+            Storyboard.SetTargetProperty(DAUKF, new PropertyPath(UIElement.OpacityProperty));
+
+            var OAUKF = new ObjectAnimationUsingKeyFrames();
+            {
+                OAUKF.KeyFrames.Add(new DiscreteObjectKeyFrame()
+                {
+                    KeyTime = KeyTime.FromTimeSpan(TimeSpan.FromSeconds(EndTime + diff)),
+                    Value = Visibility.Collapsed
+                });
+            }
+            Storyboard.SetTarget(OAUKF, window);
+            Storyboard.SetTargetProperty(OAUKF, new PropertyPath(UIElement.VisibilityProperty));
+
+            sb.Completed += (s, e) => { callback(); };
+            sb.Children.Add(DAUKF);
+            sb.Children.Add(OAUKF);
+            sb.Begin(window);
+        };
+
+        WF.NotifyIcon noti;
+
+        private void NotifyIcon()
+        {
+            noti = new WF.NotifyIcon()
+            {
+                Text = Application.ResourceAssembly.GetName().Name,
+                Visible = true,
+                Icon = System.Drawing.Icon.ExtractAssociatedIcon(WF.Application.ExecutablePath)
+            };
+            ShowInTaskbar = false;
+
+            WF.ContextMenuStrip cs = new();
+            {
+                WF.ToolStripMenuItem tsm_Close = new() { Text = "Exit", Image = noti.Icon.ToBitmap() };
+                tsm_Close.Click += (s, e) => 
+                {
+                    MainWindowCloseAnimation(this, () =>
+                    {
+                        noti.Visible = false; noti.Dispose(); Environment.Exit(0);
+                    });
+                };
+
+                cs.Items.Add(tsm_Close);
+            }
+            noti.ContextMenuStrip = cs;
+
+            //
+            noti.MouseUp += (s, e) =>
+            {
+                if (e.Button == WF.MouseButtons.Left)
+                {
+                    if (this.WindowState == WindowState.Minimized)
+                    {
+                        this.Show();
+                        this.WindowState = WindowState.Normal;
+                    }
+                    else
+                    {
+                        this.WindowState = WindowState.Minimized; 
+                        this.Hide();
+                    }
+                }
+            };
         }
     }
 }

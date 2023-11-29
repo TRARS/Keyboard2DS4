@@ -13,6 +13,7 @@ using System.Windows.Data;
 using System.Windows.Media;
 using System.Windows.Media.Effects;
 using System.Windows.Media.Imaging;
+using System.Windows.Shapes;
 using Key = SharpDX.DirectInput.Key;
 
 namespace Keyboard2DS4.MainWindow.UserControlEx.ClientEx
@@ -339,6 +340,30 @@ namespace Keyboard2DS4.MainWindow.UserControlEx.ClientEx
             this.DS4LayoutItemsOutline = new(Enumerable.Range(0, OutLineIndexInfo.Values.Max() + 1).Select(idx => false));
         }
 
+        private void CallbackInit()
+        {
+            Mediator.Instance.Register(KeyMapperMessageType.Instance.GetCurrentKeyMapperMouseEnterItemModel, (para) =>
+            {
+                if (para is MappingInfoPacket<Key> model)
+                {
+                    var key = model.BtnName;
+                    if (model.BtnName == "L2Btn") { key = "L2"; }
+                    if (model.BtnName == "R2Btn") { key = "R2"; }
+
+                    if (OutLineIndexInfo.TryGetValue(key, out var value))
+                    {
+                        DS4LayoutItemsOutline[value] = true;
+                    }
+
+                    //Debug.WriteLine($"{model.BtnName} <- {model.BtnMapping.GetFirstKey}");
+                }
+                else
+                {
+                    DS4LayoutItemsOutline = new(Enumerable.Range(0, OutLineIndexInfo.Values.Max() + 1).Select(idx => false));
+                }
+            });
+        }
+
         private void MainLoop()
         {
             Task.Run(async () =>
@@ -454,10 +479,11 @@ namespace Keyboard2DS4.MainWindow.UserControlEx.ClientEx
                         });
                     }
                 }
-
+             
                 var border = new Border();
                 {
                     bool pressed = false;
+                    bool sitck_pressed = false;
 
                     Func<string, string> getKey = (input) => 
                     {
@@ -465,7 +491,7 @@ namespace Keyboard2DS4.MainWindow.UserControlEx.ClientEx
                         if (input == "R2") { input = "R2Btn"; }
                         return input;
                     };
-                    Action pressAct = () => 
+                    Action btnPress = () => 
                     {
                         if (pressed is false)
                         {
@@ -478,7 +504,7 @@ namespace Keyboard2DS4.MainWindow.UserControlEx.ClientEx
                             pressed = true;
                         }
                     };
-                    Action releaseAct = () => 
+                    Action btnRelease = () => 
                     {
                         if (pressed)
                         {
@@ -491,7 +517,63 @@ namespace Keyboard2DS4.MainWindow.UserControlEx.ClientEx
                             pressed = false;
                         }
                     };
+                    Action<int, bool> stickPush = (idx, is_left) =>
+                    {
+                        if (sitck_pressed is false)
+                        {
+                            var list = new List<string>();
+                            var prefix = is_left ? "LS" : "RS";
+                       
+                            switch (idx)
+                            {
+                                case 0:
+                                    list.Add($"{prefix}_Down");
+                                    break;
+                                case 1:
+                                    list.Add($"{prefix}_Left"); list.Add($"{prefix}_Down");
+                                    break;
+                                case 2:
+                                    list.Add($"{prefix}_Left");
+                                    break;
+                                case 3:
+                                    list.Add($"{prefix}_Left"); list.Add($"{prefix}_Up");
+                                    break;
+                                case 4:
+                                    list.Add($"{prefix}_Up");
+                                    break;
+                                case 5:
+                                    list.Add($"{prefix}_Up"); list.Add($"{prefix}_Right");
+                                    break;
+                                case 6:
+                                    list.Add($"{prefix}_Right");
+                                    break;
+                                case 7:
+                                    list.Add($"{prefix}_Right"); list.Add($"{prefix}_Down");
+                                    break;
+                            }
+                            list.ForEach(item => 
+                            {
+                                RealKeyboard.Instance.HitTest[cKeyMapper_viewmodel.Instance.MappingInfoDic[item]] = true;
+                            });
 
+                            sitck_pressed = true;
+                        }
+                    };
+                    Action stickRelease = () => 
+                    {
+                        if (sitck_pressed)
+                        {
+                            var list = cKeyMapper_viewmodel.Instance.MappingInfoDic.Where(kvp => kvp.Key.Contains("LS_") || kvp.Key.Contains("RS_"))
+                                                                                   .Select(kvp => kvp.Value)
+                                                                                   .ToList();
+                            list.ForEach(item =>
+                            {
+                                RealKeyboard.Instance.HitTest[item] = false;
+                            });
+
+                            sitck_pressed = false;
+                        }
+                    };
 
                     if (prop != "Base")
                     {
@@ -514,6 +596,24 @@ namespace Keyboard2DS4.MainWindow.UserControlEx.ClientEx
                             Converter = new uClient_converter_bool2opacity(),
                             Mode = BindingMode.OneWay
                         });
+                        
+                        //
+                        if (prop == "L2" || prop == "R2")
+                        {
+                            border.Margin = new(mg.Left - thickness - padding, mg.Top - thickness - padding, mg.Right, mg.Bottom - 4);
+                            border.Width = w + (thickness + padding) * 2;
+                            border.Height = h + (thickness + padding) * 2 - 4;
+                        }
+
+                        //stick
+                        if (prop == "L3" || prop == "R3" || prop.Contains("LX") || prop.Contains("RX"))
+                        {
+                            var padding_stick = 25;
+                            border.Margin = new(mg.Left - thickness - padding_stick, mg.Top - thickness - padding_stick, mg.Right, mg.Bottom);
+                            border.Width = w + (thickness + padding_stick) * 2;
+                            border.Height = h + (thickness + padding_stick) * 2;
+                            border.CornerRadius = new((Math.Max(border.Width, border.Height)) / 2);
+                        }
 
                         border.MouseEnter += (s, e) =>
                         {
@@ -523,15 +623,28 @@ namespace Keyboard2DS4.MainWindow.UserControlEx.ClientEx
                         {
                             DS4LayoutItemsOutline[OutLineIndexInfo[prop]] = false;
 
-                            releaseAct.Invoke();
+                            btnRelease.Invoke();
+                            stickRelease.Invoke();
                         };
                         border.MouseLeftButtonDown += (s, e) =>
                         {
-                            pressAct.Invoke();
+                            if(prop == "L3" || prop == "R3")
+                            {
+                                var pt = e.GetPosition(border);
+                                var idx = AngleCalculator.Instance.GetAngle(new(pt.X, pt.Y), new(border.ActualWidth / 2, border.ActualHeight / 2));
+
+                                if(idx > -1)
+                                {
+                                    stickPush.Invoke(idx, prop == "L3"); return;
+                                }
+                            }
+
+                            btnPress.Invoke();
                         };
                         border.MouseLeftButtonUp += (s, e) =>
                         {
-                            releaseAct.Invoke();
+                            btnRelease.Invoke();
+                            stickRelease.Invoke();
                         };
                     }
                 };
@@ -590,31 +703,6 @@ namespace Keyboard2DS4.MainWindow.UserControlEx.ClientEx
             }
 
             return null;
-        }
-
-        //注册回调
-        private void CallbackInit()
-        {
-            Mediator.Instance.Register(KeyMapperMessageType.Instance.GetCurrentKeyMapperMouseEnterItemModel, (para) =>
-            {
-                if (para is MappingInfoPacket<Key> model)
-                {
-                    var key = model.BtnName;
-                    if (model.BtnName == "L2Btn") { key = "L2"; }
-                    if (model.BtnName == "R2Btn") { key = "R2"; }
-
-                    if (OutLineIndexInfo.TryGetValue(key, out var value))
-                    {
-                        DS4LayoutItemsOutline[value] = true;
-                    }
-
-                    //Debug.WriteLine($"{model.BtnName} <- {model.BtnMapping.GetFirstKey}");
-                }
-                else
-                {
-                    DS4LayoutItemsOutline = new(Enumerable.Range(0, OutLineIndexInfo.Values.Max() + 1).Select(idx => false));
-                }
-            });
         }
     }
 }

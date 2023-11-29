@@ -19,11 +19,11 @@ namespace Keyboard2DS4.MainWindow.CustomControlEx.KeyMapperEx
             GetCurrentKeyMapperMouseEnterItemModel = nameof(GetCurrentKeyMapperMouseEnterItemModel) + GenerateRandomString(16);
         }
 
-        private Random random = new Random();
+        private Random random = new();
         private string GenerateRandomString(int length)
         {
             const string chars = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
-            StringBuilder stringBuilder = new StringBuilder();
+            StringBuilder stringBuilder = new();
 
             for (int i = 0; i < length; i++)
             {
@@ -106,7 +106,7 @@ namespace Keyboard2DS4.MainWindow.CustomControlEx.KeyMapperEx
                 }
                 else
                 {
-                    return new T[0];
+                    return Array.Empty<T>();
                 }
             }
         }

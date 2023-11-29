@@ -11,9 +11,6 @@
              MinWidth="300" 
              MinHeight="150" 
              >
-    <UserControl.Resources>
-        <BooleanToVisibilityConverter x:Key="BoolVisibilityConverter" />
-    </UserControl.Resources>
     <d:UserControl.DataContext>
         <local:uClient_viewmodel/>
     </d:UserControl.DataContext>

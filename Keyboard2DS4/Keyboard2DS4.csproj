@@ -7,10 +7,15 @@
     <UseWPF>true</UseWPF>
     <UseWindowsForms>true</UseWindowsForms>
     <Platforms>x64</Platforms>
+    <ApplicationIcon>Keyboard2DS4.ico</ApplicationIcon>
   </PropertyGroup>
 
   <ItemGroup>
     <None Remove="MainWindow\EffectEx\TranslationalEffect\TranslationalEffect.ps" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="Keyboard2DS4.ico" />
   </ItemGroup>
 
   <ItemGroup>

@@ -7,6 +7,7 @@
         xmlns:TitleBarEx="clr-namespace:Keyboard2DS4.MainWindow.UserControlEx.TitleBarEx" 
         xmlns:ClientEx="clr-namespace:Keyboard2DS4.MainWindow.UserControlEx.ClientEx" 
         xmlns:RainbowlineEx="clr-namespace:Keyboard2DS4.MainWindow.UserControlEx.RainbowLineEx"
+        x:Name="window"
         mc:Ignorable="d"
         SnapsToDevicePixels="True" 
         WindowStartupLocation="Manual" 
