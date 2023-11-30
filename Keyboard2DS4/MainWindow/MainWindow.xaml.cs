@@ -20,9 +20,9 @@ namespace Keyboard2DS4.MainWindow
             var handle = new WindowInteropHelper(this).Handle;
             if (handle != IntPtr.Zero)
             {
-                var index = (int)Win32.GetWindowLongIndex.GWL_EXSTYLE;
-                var style = (int)Win32.WindowStyles.WS_EX_NOACTIVATE;
-                Win32.SetWindowLong(handle, index, style);
+                var style = Win32.GetWindowLong(handle, (int)Win32.GetWindowLongIndex.GWL_STYLE);
+                style |= (int)Win32.WindowStyles.WS_CAPTION;
+                Win32.SetWindowLong(handle, (int)Win32.GetWindowLongIndex.GWL_STYLE, style);
                 HwndSource.FromHwnd(handle).AddHook(new HwndSourceHook(this.WindowProc));
             }
         }

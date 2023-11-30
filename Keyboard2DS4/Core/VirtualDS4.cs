@@ -145,10 +145,10 @@ namespace Keyboard2DS4.Core
     //更新DS4报文
     partial class VirtualDS4
     {
-        public Dictionary<string, ResultPacket> Update(Dictionary<Key, bool> mp, Dictionary<string, Key>? mpInfo)
+        public Dictionary<string, ResultPacket> Update(Dictionary<Key, bool> dic_key2bool, Dictionary<string, Key>? dic_str2key)
         {
             //
-            this.UpdateMappingInfo(mpInfo);
+            this.UpdateMappingInfo(dic_str2key);
 
             //
             var tempButtons = (ushort)0;
@@ -158,13 +158,13 @@ namespace Keyboard2DS4.Core
             unchecked
             {
                 //常规按钮
-                SetButton(mappingButton, mp, ref tempButtons);
+                SetButton(mappingButton, dic_key2bool, ref tempButtons);
 
                 //特殊按钮
-                SetSpButton(mappingSpButton, mp, ref tempSpecial);
+                SetSpButton(mappingSpButton, dic_key2bool, ref tempSpecial);
 
                 //十字键
-                SetDpad(mappingDPadDirection, mp, ref tempDPad);
+                SetDpad(mappingDPadDirection, dic_key2bool, ref tempDPad);
 
                 //
                 ds4.SetButtonsFull(tempButtons);
@@ -173,12 +173,12 @@ namespace Keyboard2DS4.Core
             }
 
             //左右扳机键
-            ds4.LeftTrigger = (byte)(mp[mappingButton[DualShock4Button.TriggerLeft]] ? 255 : 0);
-            ds4.RightTrigger = (byte)(mp[mappingButton[DualShock4Button.TriggerRight]] ? 255 : 0);
+            ds4.LeftTrigger = (byte)(dic_key2bool[mappingButton[DualShock4Button.TriggerLeft]] ? 255 : 0);
+            ds4.RightTrigger = (byte)(dic_key2bool[mappingButton[DualShock4Button.TriggerRight]] ? 255 : 0);
 
             //左右摇杆
-            SetStick(mappingLeftStick, mp, out ds4.LeftThumbX, out ds4.LeftThumbY, true);
-            SetStick(mappingRightStick, mp, out ds4.RightThumbX, out ds4.RightThumbY);
+            SetStick(mappingLeftStick, dic_key2bool, out ds4.LeftThumbX, out ds4.LeftThumbY, true);
+            SetStick(mappingRightStick, dic_key2bool, out ds4.RightThumbX, out ds4.RightThumbY);
 
             //
             ds4.SubmitReport();

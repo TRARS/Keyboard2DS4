@@ -88,41 +88,41 @@ namespace Keyboard2DS4.MainWindow.CustomControlEx.KeyMapperEx
                 "RS_Right",
             };
 
-            //映射信息
+            //缺省映射信息
             Dictionary<string, MappingInfo<Key>> BtnMappingCondition = new Dictionary<string, MappingInfo<Key>>
             {
-                { "Share", new (()=> false,    new[] { Key.D1 }, null) },
-                { "Options", new (()=> false,  new[] { Key.D2 }, null ) },
-                { "L3",  new (()=> false,      new[] { Key.D3 }, null ) },
-                { "R3",  new (()=> false,      new[] { Key.D4 }, null ) },
+                { "Share",   new (()=> false,   [Key.D1], null) },
+                { "Options", new (()=> false,   [Key.D2], null) },
+                { "L3",      new (()=> false,   [Key.D3], null) },
+                { "R3",      new (()=> false,   [Key.D4], null) },
 
-                { "L1", new (()=> false,       new[] { Key.D5 }, null) },
-                { "R1", new (()=> false,       new[] { Key.D6 }, null ) },
-                { "L2Btn",  new (()=> false,   new[] { Key.D7 }, null ) },
-                { "R2Btn",  new (()=> false,   new[] { Key.D8 }, null ) },
+                { "L1",    new (()=> false,     [Key.D5], null) },
+                { "R1",    new (()=> false,     [Key.D6], null) },
+                { "L2Btn", new (()=> false,     [Key.D7], null) },
+                { "R2Btn", new (()=> false,     [Key.D8], null) },
 
-                { "Triangle", new (()=> false, new[] { Key.I }, null) },
-                { "Cross",  new (()=> false,   new[] { Key.K }, null ) },
-                { "Square",  new (()=> false,  new[] { Key.J }, null ) },
-                { "Circle", new (()=> false,   new[] { Key.L }, null ) },
+                { "Triangle", new (()=> false,  [Key.I], null) },
+                { "Cross",    new (()=> false,  [Key.K], null) },
+                { "Square",   new (()=> false,  [Key.J], null) },
+                { "Circle",   new (()=> false,  [Key.L], null) },
 
-                { "PS",    new (()=> false,     new[] { Key.D9 }, null ) },
-                { "Touchpad",  new (()=> false, new[] { Key.D0 }, null ) },
+                { "PS",       new (()=> false,  [Key.D9], null) },
+                { "Touchpad", new (()=> false,  [Key.D0], null) },
 
-                { "DpadUp",    new (()=> false, new[] { Key.T }, null ) },
-                { "DpadDown",  new (()=> false, new[] { Key.G }, null ) },
-                { "DpadLeft",  new (()=> false, new[] { Key.F }, null ) },
-                { "DpadRight", new (()=> false, new[] { Key.H }, null ) },
+                { "DpadUp",    new (()=> false, [Key.T], null) },
+                { "DpadDown",  new (()=> false, [Key.G], null) },
+                { "DpadLeft",  new (()=> false, [Key.F], null) },
+                { "DpadRight", new (()=> false, [Key.H], null) },
 
-                { "LS_Up",  new (()=> false,     new[] { Key.W }, null ) },
-                { "LS_Down",  new (()=> false,   new[] { Key.S }, null ) },
-                { "LS_Left",  new (()=> false,   new[] { Key.A }, null ) },
-                { "LS_Right", new (()=> false,   new[] { Key.D }, null ) },
+                { "LS_Up",    new (()=> false,  [Key.W], null) },
+                { "LS_Down",  new (()=> false,  [Key.S], null) },
+                { "LS_Left",  new (()=> false,  [Key.A], null) },
+                { "LS_Right", new (()=> false,  [Key.D], null) },
 
-                { "RS_Up",    new (()=> false,   new[] { Key.Up }, null ) },
-                { "RS_Down",  new (()=> false,   new[] { Key.Down }, null ) },
-                { "RS_Left", new (()=> false,    new[] { Key.Left}, null ) },
-                { "RS_Right", new (()=> false,   new[] { Key.Right }, null ) }
+                { "RS_Up",    new (()=> false,  [Key.Up], null) },
+                { "RS_Down",  new (()=> false,  [Key.Down], null) },
+                { "RS_Left",  new (()=> false,  [Key.Left], null) },
+                { "RS_Right", new (()=> false,  [Key.Right], null) }
             };
 
             //调序

@@ -368,8 +368,6 @@ namespace Keyboard2DS4.MainWindow.UserControlEx.ClientEx
         {
             Task.Run(async () =>
             {
-                Dictionary<string, Key> mpInfo = DefaultMappingInfo;
-
                 try
                 {
                     while (true)
@@ -386,8 +384,6 @@ namespace Keyboard2DS4.MainWindow.UserControlEx.ClientEx
     //一般属性
     partial class uClient_viewmodel
     {
-        Dictionary<string, Key> DefaultMappingInfo = new();
-
         Dictionary<string, int> OutLineIndexInfo = new Dictionary<string, int>()
         {
             { "L1", 0 },
