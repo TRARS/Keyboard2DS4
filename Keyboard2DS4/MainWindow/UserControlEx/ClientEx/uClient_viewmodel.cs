@@ -13,7 +13,6 @@ using System.Windows.Data;
 using System.Windows.Media;
 using System.Windows.Media.Effects;
 using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
 using Key = SharpDX.DirectInput.Key;
 
 namespace Keyboard2DS4.MainWindow.UserControlEx.ClientEx
@@ -463,6 +462,7 @@ namespace Keyboard2DS4.MainWindow.UserControlEx.ClientEx
                             Converter = new uClient_converter_vector2pivot(),
                             Mode = BindingMode.OneWay
                         });
+                        grid.IsHitTestVisible = false;//LXRX只负责移动，不负责捕获鼠标
                     }
                     if (prop == "L3" || prop == "R3")
                     {
@@ -479,7 +479,6 @@ namespace Keyboard2DS4.MainWindow.UserControlEx.ClientEx
                 var border = new Border();
                 {
                     bool pressed = false;
-                    bool sitck_pressed = false;
 
                     Func<string, string> getKey = (input) => 
                     {
@@ -513,68 +512,66 @@ namespace Keyboard2DS4.MainWindow.UserControlEx.ClientEx
                             pressed = false;
                         }
                     };
+                    //
+                    Action stickRelease = () =>
+                    {
+                        var list = cKeyMapper_viewmodel.Instance.MappingInfoDic.Where(kvp => kvp.Key.Contains("LS_") || kvp.Key.Contains("RS_"))
+                                                                               .Select(kvp => kvp.Value)
+                                                                               .ToList();
+                        list.ForEach(item =>
+                        {
+                            RealKeyboard.Instance.HitTest[item] = false;
+                        });
+                    };
                     Action<int, bool> stickPush = (idx, is_left) =>
                     {
-                        if (sitck_pressed is false)
-                        {
-                            var list = new List<string>();
-                            var prefix = is_left ? "LS" : "RS";
-                       
-                            switch (idx)
-                            {
-                                case 0:
-                                    list.Add($"{prefix}_Down");
-                                    break;
-                                case 1:
-                                    list.Add($"{prefix}_Left"); list.Add($"{prefix}_Down");
-                                    break;
-                                case 2:
-                                    list.Add($"{prefix}_Left");
-                                    break;
-                                case 3:
-                                    list.Add($"{prefix}_Left"); list.Add($"{prefix}_Up");
-                                    break;
-                                case 4:
-                                    list.Add($"{prefix}_Up");
-                                    break;
-                                case 5:
-                                    list.Add($"{prefix}_Up"); list.Add($"{prefix}_Right");
-                                    break;
-                                case 6:
-                                    list.Add($"{prefix}_Right");
-                                    break;
-                                case 7:
-                                    list.Add($"{prefix}_Right"); list.Add($"{prefix}_Down");
-                                    break;
-                            }
-                            list.ForEach(item => 
-                            {
-                                RealKeyboard.Instance.HitTest[cKeyMapper_viewmodel.Instance.MappingInfoDic[item]] = true;
-                            });
+                        //stick reset
+                        stickRelease.Invoke();
 
-                            sitck_pressed = true;
-                        }
-                    };
-                    Action stickRelease = () => 
-                    {
-                        if (sitck_pressed)
-                        {
-                            var list = cKeyMapper_viewmodel.Instance.MappingInfoDic.Where(kvp => kvp.Key.Contains("LS_") || kvp.Key.Contains("RS_"))
-                                                                                   .Select(kvp => kvp.Value)
-                                                                                   .ToList();
-                            list.ForEach(item =>
-                            {
-                                RealKeyboard.Instance.HitTest[item] = false;
-                            });
+                        //stick push
+                        var list = new List<string>();
+                        var prefix = is_left ? "LS" : "RS";
 
-                            sitck_pressed = false;
+                        switch (idx)
+                        {
+                            case 0:
+                                list.Add($"{prefix}_Down");
+                                break;
+                            case 1:
+                                list.Add($"{prefix}_Left"); list.Add($"{prefix}_Down");
+                                break;
+                            case 2:
+                                list.Add($"{prefix}_Left");
+                                break;
+                            case 3:
+                                list.Add($"{prefix}_Left"); list.Add($"{prefix}_Up");
+                                break;
+                            case 4:
+                                list.Add($"{prefix}_Up");
+                                break;
+                            case 5:
+                                list.Add($"{prefix}_Up"); list.Add($"{prefix}_Right");
+                                break;
+                            case 6:
+                                list.Add($"{prefix}_Right");
+                                break;
+                            case 7:
+                                list.Add($"{prefix}_Right"); list.Add($"{prefix}_Down");
+                                break;
                         }
+                        list.ForEach(item =>
+                        {
+                            RealKeyboard.Instance.HitTest[cKeyMapper_viewmodel.Instance.MappingInfoDic[item]] = true;
+                        });
                     };
+
 
                     if (prop != "Base")
                     {
+                        var isMousePressed = false;
                         var thickness = 2;
                         var padding = 5;
+
                         border.HorizontalAlignment = HorizontalAlignment.Left;
                         border.VerticalAlignment = VerticalAlignment.Top;
                         border.Margin = new(mg.Left - thickness - padding, mg.Top - thickness - padding, mg.Right, mg.Bottom);
@@ -602,7 +599,7 @@ namespace Keyboard2DS4.MainWindow.UserControlEx.ClientEx
                         }
 
                         //stick
-                        if (prop == "L3" || prop == "R3" || prop.Contains("LX") || prop.Contains("RX"))
+                        if (prop == "L3" || prop == "R3")
                         {
                             var padding_stick = 25;
                             border.Margin = new(mg.Left - thickness - padding_stick, mg.Top - thickness - padding_stick, mg.Right, mg.Bottom);
@@ -622,25 +619,49 @@ namespace Keyboard2DS4.MainWindow.UserControlEx.ClientEx
                             btnRelease.Invoke();
                             stickRelease.Invoke();
                         };
-                        border.MouseLeftButtonDown += (s, e) =>
+                        border.PreviewMouseLeftButtonDown += (s, e) =>
                         {
-                            if(prop == "L3" || prop == "R3")
-                            {
-                                var pt = e.GetPosition(border);
-                                var idx = AngleCalculator.Instance.GetAngle(new(pt.X, pt.Y), new(border.ActualWidth / 2, border.ActualHeight / 2));
+                            isMousePressed = true;
 
-                                if(idx > -1)
+                            if (prop == "L3" || prop == "R3")
+                            {
+                                var pt = e.MouseDevice.GetPosition(border);
+                                var idx = AngleCalculator.Instance.GetAngle(new(pt.X, pt.Y), new(border.ActualWidth / 2, border.ActualHeight / 2));
+                                var isLeft = prop == "L3";
+                                if (idx > -1)
                                 {
-                                    stickPush.Invoke(idx, prop == "L3"); return;
+                                    stickPush.Invoke(idx, isLeft); return;
                                 }
                             }
 
                             btnPress.Invoke();
                         };
-                        border.MouseLeftButtonUp += (s, e) =>
+                        border.PreviewMouseLeftButtonUp += (s, e) =>
                         {
-                            btnRelease.Invoke();
-                            stickRelease.Invoke();
+                            if (isMousePressed)
+                            {
+                                isMousePressed = false;
+
+                                btnRelease.Invoke();
+                                stickRelease.Invoke();
+
+                                border.ReleaseMouseCapture();
+                            }
+                        };
+                        border.PreviewMouseMove += (s, e) => 
+                        {
+                            if (isMousePressed)
+                            {
+                                border.CaptureMouse();
+
+                                if (prop == "L3" || prop == "R3")
+                                {
+                                    var pt = e.MouseDevice.GetPosition(border);
+                                    var idx = AngleCalculator.Instance.GetAngle(new(pt.X, pt.Y), new(border.ActualWidth / 2, border.ActualHeight / 2));
+                                    var isLeft = prop == "L3";
+                                    stickPush.Invoke(idx, isLeft); return;
+                                }
+                            }
                         };
                     }
                 };
