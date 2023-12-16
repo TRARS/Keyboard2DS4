@@ -706,20 +706,17 @@ namespace Keyboard2DS4.MainWindow.UserControlEx.ClientEx
         //更新映射信息
         private Dictionary<string, Key>? UpdateMappingInfo()
         {
-            if (CounterAccessor.Instance["egvGXM2cy^r2epVK"] is CounterAccessor.InternalCounter counter)
-            {
-                if (counter.GetCount() == 0)
-                {
-                    return null;
-                }
-                else
-                {
-                    counter.Decrement();
-                    return cKeyMapper_viewmodel.Instance.MappingInfoDic;
-                }
-            }
+            var counter = CounterAccessor.Instance["egvGXM2cy^r2epVK"];
 
-            return null;
+            if (counter.GetCount() == 0)
+            {
+                return null;
+            }
+            else
+            {
+                counter.Decrement();
+                return cKeyMapper_viewmodel.Instance.MappingInfoDic;
+            }
         }
     }
 }

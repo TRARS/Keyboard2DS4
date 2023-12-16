@@ -34,7 +34,7 @@ namespace Keyboard2DS4.Core
         static Func<ResultPacket> CreateStickValue = () => { return new ResultPacket() { StickValue = new(128, 128) }; };
 
         //
-        Dictionary<string, ResultPacket> result = new()
+        readonly Dictionary<string, ResultPacket> result = new()
         {
             { nameof(DualShock4Button.Share), CreateButtonValue() },      //Share
             { nameof(DualShock4Button.Options), CreateButtonValue() },    //Options
