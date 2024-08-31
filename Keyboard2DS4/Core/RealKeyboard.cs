@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using static Keyboard2DS4.Core.VirtualDS4Ext;
 using Key = SharpDX.DirectInput.Key;
 
 namespace Keyboard2DS4.Core
@@ -49,22 +50,22 @@ namespace Keyboard2DS4.Core
             {
                 // キーボード入力周りの初期化
                 keyboard = new Keyboard(dinput);
-                if (keyboard != null)
-                {
-                    // バッファサイズを指定
-                    keyboard.Properties.BufferSize = 128;
-                }
+
+                // バッファサイズを指定
+                keyboard.Properties.BufferSize = 128;
+
+                // キャプチャするデバイスを取得
+                keyboard.Acquire();
             }
         }
 
         // キー入力処理
-        public void UpdateForKey(Action<Dictionary<string, ResultPacket>> callback, Dictionary<string, Key>? mpInfo)
+        public void UpdateForKey(Action<Dictionary<string, ResultPacket>> callback, Dictionary<string, Key>? mpInfo, TouchInfo? touchInfo)
         {
             // 初期化が出来ていない場合、処理終了
             if (keyboard == null) { return; }
 
-            // キャプチャするデバイスを取得
-            keyboard.Acquire();
+            //
             keyboard.Poll();
             currentState = keyboard.GetCurrentState();
 
@@ -73,7 +74,8 @@ namespace Keyboard2DS4.Core
                 mapping[key] = currentState.IsPressed(key) || mapping_test[key];
             }
 
-            callback.Invoke(VirtualDS4.Instance.Update(mapping, mpInfo));
+            //callback.Invoke(VirtualDS4.Instance.Update(mapping, mpInfo));
+            callback.Invoke(VirtualDS4Ext.Instance.Update(mapping, mpInfo, touchInfo));
         }
     }
 }

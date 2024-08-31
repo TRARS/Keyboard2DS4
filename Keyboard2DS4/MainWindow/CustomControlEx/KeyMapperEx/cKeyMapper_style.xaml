@@ -271,7 +271,7 @@
                                 <Border>
                                     <Grid Margin="1,1,1,0">
                                         <Rectangle Fill="#01FFFFFF"/>
-                                        <Rectangle x:Name="bk" Fill="DarkRed" Opacity="0.5" Visibility="Collapsed"/>
+                                        <Border x:Name="bk" Background="DarkRed"  Opacity="0.5" CornerRadius="2.5" Visibility="Collapsed"/>
 
                                         <StackPanel Orientation="Horizontal" VerticalAlignment="Center" MinHeight="21">
                                             <!--名字-->

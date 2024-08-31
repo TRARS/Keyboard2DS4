@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 
 namespace Keyboard2DS4.Helper
@@ -17,7 +13,7 @@ namespace Keyboard2DS4.Helper
     {
         public int GetAngle(Vector point, Vector center, bool applyAngleDeadZone = false)
         {
-            if (Math.Pow(point.X - center.X, 2.0) + Math.Pow(point.Y - center.Y, 2.0) < Math.Pow(Math.Min(center.X, center.Y) / 3, 2.0)) 
+            if (Math.Pow(point.X - center.X, 2.0) + Math.Pow(point.Y - center.Y, 2.0) < Math.Pow(Math.Min(center.X, center.Y) / 3, 2.0))
             {
                 return -1;
             }

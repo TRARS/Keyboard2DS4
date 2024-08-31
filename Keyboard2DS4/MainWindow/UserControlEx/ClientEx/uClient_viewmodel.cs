@@ -297,6 +297,8 @@ namespace Keyboard2DS4.MainWindow.UserControlEx.ClientEx
                 NotifyPropertyChanged();
             }
         }
+
+        public VirtualDS4Ext.TouchInfo? touchPacket;
     }
 
     //构造 主循环
@@ -371,7 +373,7 @@ namespace Keyboard2DS4.MainWindow.UserControlEx.ClientEx
                 {
                     while (true)
                     {
-                        RealKeyboard.Instance.UpdateForKey(UpdateUI, UpdateMappingInfo());
+                        RealKeyboard.Instance.UpdateForKey(UpdateUI, GetMappingInfo(), GetTouchInfo());
                         await Task.Delay(2);
                     }
                 }
@@ -475,18 +477,18 @@ namespace Keyboard2DS4.MainWindow.UserControlEx.ClientEx
                         });
                     }
                 }
-             
+
                 var border = new Border();
                 {
                     bool pressed = false;
 
-                    Func<string, string> getKey = (input) => 
+                    Func<string, string> getKey = (input) =>
                     {
                         if (input == "L2") { input = "L2Btn"; }
                         if (input == "R2") { input = "R2Btn"; }
                         return input;
                     };
-                    Action btnPress = () => 
+                    Action btnPress = () =>
                     {
                         if (pressed is false)
                         {
@@ -499,7 +501,7 @@ namespace Keyboard2DS4.MainWindow.UserControlEx.ClientEx
                             pressed = true;
                         }
                     };
-                    Action btnRelease = () => 
+                    Action btnRelease = () =>
                     {
                         if (pressed)
                         {
@@ -564,11 +566,42 @@ namespace Keyboard2DS4.MainWindow.UserControlEx.ClientEx
                             RealKeyboard.Instance.HitTest[cKeyMapper_viewmodel.Instance.MappingInfoDic[item]] = true;
                         });
                     };
+                    //
+                    Action<Point> touchpadTouch = (pos) =>
+                    {
+                        var aw = border.ActualWidth;
+                        var ah = border.ActualHeight;
+                        var factorX = 1920 / aw;
+                        var factorY = 942 / ah;
+                        var tx = pos.X * factorX;
+                        var ty = pos.Y * factorY;
 
+                        if (pos.X >= 0 && pos.X <= aw && pos.Y >= 0 && pos.Y <= ah)
+                        {
+                            Debug.WriteLine($"Touchpad Pos is ({(short)pos.X},{(short)pos.Y})->({(short)tx},{(short)ty})"); // -> 1920, 942
+                            touchPacket = new()
+                            {
+                                TouchPacketCounter = 1, // 非0就行
+                                Touch0_RawTrackingNum = 1,
+                                Touch0_x = (short)tx,
+                                Touch0_y = (short)ty,
+                            };
+                        }
+                        else
+                        {
+                            //
+                        }
+                    };
+                    Action touchpadReset = () =>
+                    {
+                        Debug.WriteLine("TouchpadReset");
+                        touchPacket = default;
+                    };
 
                     if (prop != "Base")
                     {
-                        var isMousePressed = false;
+                        var isMouseRightBtnPressed = false;
+                        var isMouseLeftBtnPressed = false;
                         var thickness = 2;
                         var padding = 5;
 
@@ -589,7 +622,7 @@ namespace Keyboard2DS4.MainWindow.UserControlEx.ClientEx
                             Converter = new uClient_converter_bool2opacity(),
                             Mode = BindingMode.OneWay
                         });
-                        
+
                         //
                         if (prop == "L2" || prop == "R2")
                         {
@@ -621,7 +654,7 @@ namespace Keyboard2DS4.MainWindow.UserControlEx.ClientEx
                         };
                         border.PreviewMouseLeftButtonDown += (s, e) =>
                         {
-                            isMousePressed = true;
+                            isMouseLeftBtnPressed = true;
 
                             if (prop == "L3" || prop == "R3")
                             {
@@ -638,9 +671,9 @@ namespace Keyboard2DS4.MainWindow.UserControlEx.ClientEx
                         };
                         border.PreviewMouseLeftButtonUp += (s, e) =>
                         {
-                            if (isMousePressed)
+                            if (isMouseLeftBtnPressed)
                             {
-                                isMousePressed = false;
+                                isMouseLeftBtnPressed = false;
 
                                 btnRelease.Invoke();
                                 stickRelease.Invoke();
@@ -648,9 +681,9 @@ namespace Keyboard2DS4.MainWindow.UserControlEx.ClientEx
                                 border.ReleaseMouseCapture();
                             }
                         };
-                        border.PreviewMouseMove += (s, e) => 
+                        border.PreviewMouseMove += (s, e) =>
                         {
-                            if (isMousePressed)
+                            if (isMouseLeftBtnPressed)
                             {
                                 border.CaptureMouse();
 
@@ -662,11 +695,67 @@ namespace Keyboard2DS4.MainWindow.UserControlEx.ClientEx
                                     stickPush.Invoke(idx, isLeft); return;
                                 }
                             }
+
+                            if (isMouseRightBtnPressed && prop == nameof(Touchpad))
+                            {
+                                border.CaptureMouse();
+
+                                var pos = e.GetPosition(border);
+                                touchpadTouch.Invoke(pos);
+                            }
+                        };
+
+                        // For TouchPad
+                        border.PreviewMouseRightButtonDown += (s, e) =>
+                        {
+                            if (prop != nameof(Touchpad)) { return; }
+
+                            isMouseRightBtnPressed = true;
+                        };
+                        border.PreviewMouseRightButtonUp += (s, e) =>
+                        {
+                            if (prop != nameof(Touchpad)) { return; }
+
+                            if (isMouseRightBtnPressed)
+                            {
+                                isMouseRightBtnPressed = false;
+                                border.ReleaseMouseCapture();
+
+                                touchpadReset.Invoke();
+                            }
                         };
                     }
                 };
 
+
                 grid.Children.Add(img);
+
+                if (prop == nameof(Touchpad))
+                {
+                    var hint = new Border()
+                    {
+                        Width = border.Width,
+                        Height = border.Height,
+                        HorizontalAlignment = HorizontalAlignment.Left,
+                        VerticalAlignment = VerticalAlignment.Top,
+                        Margin = border.Margin,
+                    };
+                    {
+                        hint.Child = new TextBlock()
+                        {
+                            Text = "MouseLeftDown for Touchpad Click.\n\nMouseRightDown for Touchpad touch.",
+                            FontSize = 22,
+                            FontWeight = FontWeights.Bold,
+                            TextWrapping = TextWrapping.Wrap,
+                            Foreground = new SolidColorBrush(Colors.Black),
+                            Background = new SolidColorBrush(Colors.Transparent),
+                            HorizontalAlignment = HorizontalAlignment.Center,
+                            VerticalAlignment = VerticalAlignment.Center
+                        };
+                    }
+                    grid.Children.Add(hint);
+                }
+
                 grid.Children.Add(border);
             }
 
@@ -704,7 +793,7 @@ namespace Keyboard2DS4.MainWindow.UserControlEx.ClientEx
         }
 
         //更新映射信息
-        private Dictionary<string, Key>? UpdateMappingInfo()
+        private Dictionary<string, Key>? GetMappingInfo()
         {
             var counter = CounterAccessor.Instance["egvGXM2cy^r2epVK"];
 
@@ -717,6 +806,12 @@ namespace Keyboard2DS4.MainWindow.UserControlEx.ClientEx
                 counter.Decrement();
                 return cKeyMapper_viewmodel.Instance.MappingInfoDic;
             }
+        }
+
+        //触摸板触摸
+        private VirtualDS4Ext.TouchInfo? GetTouchInfo()
+        {
+            return touchPacket;
         }
     }
 }

@@ -8,11 +8,8 @@
     <UseWindowsForms>true</UseWindowsForms>
     <Platforms>x64</Platforms>
     <ApplicationIcon>Keyboard2DS4.ico</ApplicationIcon>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
-
-  <ItemGroup>
-    <None Remove="MainWindow\EffectEx\TranslationalEffect\TranslationalEffect.ps" />
-  </ItemGroup>
 
   <ItemGroup>
     <Content Include="Keyboard2DS4.ico" />
@@ -46,6 +43,12 @@
     <Resource Include="MainWindow\Resources\ds4_Square.png" />
     <Resource Include="MainWindow\Resources\ds4_Touchpad.png" />
     <Resource Include="MainWindow\Resources\ds4_Triangle.png" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="LICENSE.txt">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
 </Project>

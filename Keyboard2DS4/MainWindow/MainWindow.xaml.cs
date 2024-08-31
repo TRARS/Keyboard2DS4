@@ -4,10 +4,10 @@ using System;
 using System.ComponentModel;
 using System.Windows;
 using System.Windows.Controls;
-using WF = System.Windows.Forms;
 using System.Windows.Interop;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
+using WF = System.Windows.Forms;
 
 namespace Keyboard2DS4.MainWindow
 {
@@ -214,7 +214,7 @@ namespace Keyboard2DS4.MainWindow
             WF.ContextMenuStrip cs = new();
             {
                 WF.ToolStripMenuItem tsm_Close = new() { Text = "Exit", Image = noti.Icon.ToBitmap() };
-                tsm_Close.Click += (s, e) => 
+                tsm_Close.Click += (s, e) =>
                 {
                     MainWindowCloseAnimation(this, () =>
                     {
@@ -238,7 +238,7 @@ namespace Keyboard2DS4.MainWindow
                     }
                     else
                     {
-                        this.WindowState = WindowState.Minimized; 
+                        this.WindowState = WindowState.Minimized;
                         this.Hide();
                     }
                 }
